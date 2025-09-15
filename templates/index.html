@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kavach AI Firewall</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+</head>
+<body class="min-h-screen bg-gray-100">
+  <!-- Navbar -->
+  <header class="flex justify-between items-center bg-gray-900 text-white px-6 py-3">
+    <h1 class="text-xl font-bold">KAVACH</h1>
+    <nav class="space-x-6">
+      <a href="#" class="hover:text-blue-400">Dashboard</a>
+      <a href="#" class="hover:text-blue-400">Logout</a>
+    </nav>
+  </header>
+
+  <!-- Main Section -->
+  <main class="p-6 text-center">
+    <h2 class="text-2xl font-bold">Kavach AI Firewall</h2>
+    <p class="text-gray-600 mb-4">AI-powered intelligent firewall for real-time protection</p>
+    <button class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg">Activate Kavach</button>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-4 gap-4 mt-6">
+      <div class="p-4 bg-white rounded-xl shadow">
+        <p class="text-gray-600">Normal Traffic</p>
+        <p class="text-2xl font-bold text-green-600">54</p>
+      </div>
+
+      <div class="p-4 bg-white rounded-xl shadow">
+        <p class="text-gray-600">Malicious Traffic</p>
+        <p class="text-2xl font-bold text-red-600">7</p>
+      </div>
+
+      <div class="p-4 bg-white rounded-xl shadow">
+        <p class="text-gray-600">Alerts</p>
+        <p class="text-2xl font-bold text-yellow-500">5</p>
+      </div>
+
+      <div class="p-4 bg-white rounded-xl shadow">
+        <p class="text-gray-600">Blocked IPs</p>
+        <p class="text-2xl font-bold text-teal-600">3</p>
+      </div>
+    </div>
+
+    <!-- Graph & Health -->
+    <div class="grid grid-cols-2 gap-6 mt-6">
+      <div class="p-4 bg-white rounded-xl shadow">
+        <h3 class="text-lg font-semibold mb-2">Traffic Overview</h3>
+        <canvas id="trafficChart"></canvas>
+      </div>
+
+      <div class="flex flex-col justify-center items-center p-4 bg-white rounded-xl shadow">
+        <h3 class="text-lg font-semibold mb-2">Network Health</h3>
+        <div class="relative w-32 h-32 rounded-full border-8 border-green-500 flex items-center justify-center">
+          <span class="text-lg font-bold text-green-600">Good</span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const ctx = document.getElementById('trafficChart');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['10:00','11:00','12:00','13:00','14:00'],
+        datasets: [
+          {
+            label: 'Normal',
+            data: [2,4,5,4,2],
+            borderColor: '#2563eb',
+            fill: false
+          },
+          {
+            label: 'Malicious',
+            data: [0,2,3,2,5],
+            borderColor: '#dc2626',
+            fill: false
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { position: 'top' } },
+        scales: { y: { beginAtZero: true } }
+      }
+    });
+  </script>
+</body>
+</html>
