@@ -3,92 +3,292 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kavach AI Firewall</title>
+  <title>Kavach CyberDash</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="min-h-screen bg-gray-100">
-  <!-- Navbar -->
-  <header class="flex justify-between items-center bg-gray-900 text-white px-6 py-3">
-    <h1 class="text-xl font-bold">KAVACH</h1>
-    <nav class="space-x-6">
-      <a href="#" class="hover:text-blue-400">Dashboard</a>
-      <a href="#" class="hover:text-blue-400">Logout</a>
+<body class="min-h-screen bg-gray-900 text-gray-100 flex">
+  <!-- Sidebar -->
+  <aside class="w-64 bg-gray-800 p-6 flex flex-col">
+    <h2 class="text-xl font-bold text-blue-400 mb-6">🔐 CyberDash</h2>
+    <nav class="flex flex-col gap-4">
+      <a href="#" class="hover:text-blue-400">📊 Dashboard</a>
+      <a href="#" class="hover:text-blue-400">⚠️ Alerts</a>
+      <a href="#" class="hover:text-blue-400">⚙️ Settings</a>
     </nav>
-  </header>
+  </aside>
 
-  <!-- Main Section -->
-  <main class="p-6 text-center">
-    <h2 class="text-2xl font-bold">Kavach AI Firewall</h2>
-    <p class="text-gray-600 mb-4">AI-powered intelligent firewall for real-time protection</p>
-    <button class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg">Activate Kavach</button>
+  <!-- Main -->
+  <div class="flex-1 flex flex-col">
+    <!-- Header -->
+    <header class="flex justify-between items-center bg-gray-800 px-6 py-3 border-b border-gray-700">
+      <h1 class="text-xl font-bold text-blue-400">Kavach AI Firewall</h1>
+      <div>👤 Admin</div>
+    </header>
+
+    <!-- Controls -->
+    <div class="flex items-center gap-4 p-4">
+      <input type="file" id="fileInput" accept=".csv"
+        class="bg-gray-700 text-white px-3 py-2 rounded-md border border-gray-600" />
+      <label for="filter" class="text-gray-300">Filter:</label>
+      <select id="filter" class="bg-gray-700 text-white px-3 py-2 rounded-md border border-gray-600">
+        <option value="all">All</option>
+        <option value="normal">Normal</option>
+        <option value="malicious">Malicious</option>
+        <option value="ddos">DDOS</option>
+      </select>
+
+      <!-- Start / Stop backend generator -->
+      <button id="startBtn" class="ml-auto bg-green-600 hover:bg-green-700 px-4 py-2 rounded-md font-semibold">Start Stream</button>
+      <button id="stopBtn" class="ml-2 bg-red-600 hover:bg-red-700 px-4 py-2 rounded-md font-semibold">Stop Stream</button>
+    </div>
 
     <!-- Stats -->
-    <div class="grid grid-cols-4 gap-4 mt-6">
-      <div class="p-4 bg-white rounded-xl shadow">
-        <p class="text-gray-600">Normal Traffic</p>
-        <p class="text-2xl font-bold text-green-600">54</p>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 p-4">
+      <div class="bg-gray-800 p-4 rounded-xl shadow text-center">
+        <p class="text-gray-400">Normal Traffic</p>
+        <p id="normalCount" class="text-2xl font-bold text-green-500">0</p>
       </div>
-
-      <div class="p-4 bg-white rounded-xl shadow">
-        <p class="text-gray-600">Malicious Traffic</p>
-        <p class="text-2xl font-bold text-red-600">7</p>
+      <div class="bg-gray-800 p-4 rounded-xl shadow text-center">
+        <p class="text-gray-400">Malicious Traffic</p>
+        <p id="maliciousCount" class="text-2xl font-bold text-red-500">0</p>
       </div>
-
-      <div class="p-4 bg-white rounded-xl shadow">
-        <p class="text-gray-600">Alerts</p>
-        <p class="text-2xl font-bold text-yellow-500">5</p>
+      <div class="bg-gray-800 p-4 rounded-xl shadow text-center">
+        <p class="text-gray-400">DDOS Traffic</p>
+        <p id="ddosCount" class="text-2xl font-bold text-yellow-500">0</p>
       </div>
-
-      <div class="p-4 bg-white rounded-xl shadow">
-        <p class="text-gray-600">Blocked IPs</p>
-        <p class="text-2xl font-bold text-teal-600">3</p>
+      <div class="bg-gray-800 p-4 rounded-xl shadow text-center">
+        <p class="text-gray-400">Total Logs</p>
+        <p id="totalCount" class="text-2xl font-bold text-blue-400">0</p>
       </div>
     </div>
 
-    <!-- Graph & Health -->
-    <div class="grid grid-cols-2 gap-6 mt-6">
-      <div class="p-4 bg-white rounded-xl shadow">
+    <!-- Charts -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-4">
+      <div class="bg-gray-800 p-4 rounded-xl shadow">
         <h3 class="text-lg font-semibold mb-2">Traffic Overview</h3>
         <canvas id="trafficChart"></canvas>
       </div>
-
-      <div class="flex flex-col justify-center items-center p-4 bg-white rounded-xl shadow">
+      <div class="bg-gray-800 p-4 rounded-xl shadow flex flex-col items-center justify-center">
         <h3 class="text-lg font-semibold mb-2">Network Health</h3>
-        <div class="relative w-32 h-32 rounded-full border-8 border-green-500 flex items-center justify-center">
-          <span class="text-lg font-bold text-green-600">Good</span>
-        </div>
+        <canvas id="healthGauge" width="200" height="200"></canvas>
+        <p id="healthStatus" class="font-bold mt-2 text-green-500">-</p>
       </div>
     </div>
-  </main>
+
+    <!-- Logs Table -->
+    <div class="flex-1 overflow-auto p-4">
+      <div class="bg-gray-800 rounded-xl shadow overflow-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-gray-700 sticky top-0">
+            <tr>
+              <th class="px-3 py-2">Source IP</th>
+              <th class="px-3 py-2">Destination IP</th>
+              <th class="px-3 py-2">Source Port</th>
+              <th class="px-3 py-2">Destination Port</th>
+              <th class="px-3 py-2">Protocol</th>
+              <th class="px-3 py-2">Flag</th>
+              <th class="px-3 py-2">Raw</th>
+              <th class="px-3 py-2">Label</th>
+            </tr>
+          </thead>
+          <tbody id="logsTable" class="divide-y divide-gray-700"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 
   <script>
-    const ctx = document.getElementById('trafficChart');
-    new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: ['10:00','11:00','12:00','13:00','14:00'],
-        datasets: [
-          {
-            label: 'Normal',
-            data: [2,4,5,4,2],
-            borderColor: '#2563eb',
-            fill: false
-          },
-          {
-            label: 'Malicious',
-            data: [0,2,3,2,5],
-            borderColor: '#dc2626',
-            fill: false
+    const fileInput = document.getElementById('fileInput');
+    const filter = document.getElementById('filter');
+    const logsTableBody = document.getElementById('logsTable');
+
+    const startBtn = document.getElementById('startBtn');
+    const stopBtn = document.getElementById('stopBtn');
+
+    const normalCount = document.getElementById("normalCount");
+    const maliciousCount = document.getElementById("maliciousCount");
+    const ddosCount = document.getElementById("ddosCount");
+    const totalCount = document.getElementById("totalCount");
+    const healthStatus = document.getElementById("healthStatus");
+
+    let allLogs = [];
+    let sse = null;
+    let trafficChart = null;
+    let healthGauge = null;
+
+    function parseCSV(text) {
+      const lines = text.trim().split('\n');
+      const headers = lines[0].split(',');
+      return lines.slice(1).map(line => {
+        const values = line.split(',');
+        const obj = {};
+        headers.forEach((h, i) => obj[h.trim()] = values[i] ? values[i].trim() : "");
+        return obj;
+      });
+    }
+
+    function renderLogs(logs) {
+      logsTableBody.innerHTML = '';
+      logs.forEach(log => {
+        const row = document.createElement('tr');
+        row.className = "hover:bg-gray-700";
+        row.innerHTML = `
+          <td class="px-3 py-2">${log.src_ip}</td>
+          <td class="px-3 py-2">${log.dst_ip}</td>
+          <td class="px-3 py-2">${log.src_port}</td>
+          <td class="px-3 py-2">${log.dst_port}</td>
+          <td class="px-3 py-2">${log.protocol}</td>
+          <td class="px-3 py-2">${log.flag}</td>
+          <td class="px-3 py-2">${log.raw}</td>
+          <td class="px-3 py-2">
+            <span class="px-2 py-1 rounded text-xs font-bold
+              ${log.label.toLowerCase() === 'normal' ? 'bg-green-700 text-green-200' :
+                log.label.toLowerCase() === 'malicious' ? 'bg-red-700 text-red-200' :
+                'bg-yellow-700 text-yellow-200'}">
+              ${log.label}
+            </span>
+          </td>
+        `;
+        logsTableBody.appendChild(row);
+      });
+    }
+
+    function updateStatsAndCharts() {
+      const normal = allLogs.filter(l => l.label.toLowerCase() === "normal").length;
+      const malicious = allLogs.filter(l => l.label.toLowerCase() === "malicious").length;
+      const ddos = allLogs.filter(l => l.label.toLowerCase() === "ddos").length;
+      const total = allLogs.length;
+
+      normalCount.textContent = normal;
+      maliciousCount.textContent = malicious;
+      ddosCount.textContent = ddos;
+      totalCount.textContent = total;
+
+      const health = total ? Math.round((normal / total) * 100) : 0;
+      healthStatus.textContent = health > 70 ? "Good" : health > 40 ? "Moderate" : "Critical";
+      healthStatus.className = `font-bold mt-2 ${health > 70 ? "text-green-500" : health > 40 ? "text-yellow-500" : "text-red-500"}`;
+
+      // Traffic bar
+      if (trafficChart) trafficChart.destroy();
+      const ctx = document.getElementById("trafficChart").getContext("2d");
+      trafficChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: ["Normal", "Malicious", "DDOS"],
+          datasets: [{
+            label: "Traffic Count",
+            data: [normal, malicious, ddos],
+            backgroundColor: ["#22c55e", "#ef4444", "#facc15"]
+          }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } } }
+      });
+
+      // Health gauge (semi-donut)
+      if (healthGauge) healthGauge.destroy();
+      const gaugeCtx = document.getElementById("healthGauge").getContext("2d");
+      healthGauge = new Chart(gaugeCtx, {
+        type: "doughnut",
+        data: {
+          datasets: [{
+            data: [health, 100 - health],
+            backgroundColor: ["#22c55e", "#1f2937"],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          circumference: 180,
+          rotation: 270,
+          cutout: "70%",
+          plugins: { legend: { display: false } }
+        }
+      });
+    }
+
+    // SSE receiver: expects Python to send event data: plain JS object string via `data: { ... }\n\n`
+    function openSSE() {
+      if (sse) sse.close();
+      sse = new EventSource("/stream");
+      sse.onmessage = (e) => {
+        try {
+          // backend sent Python dict string representation; try to parse it reliably
+          // We'll attempt to convert to JSON by replacing single quotes with double quotes (simple hack)
+          let text = e.data;
+          // If it's already JSON-like, try JSON.parse
+          let obj;
+          try {
+            obj = JSON.parse(text);
+          } catch(_) {
+            // fallback: replace single quotes with double quotes for parsing
+            obj = JSON.parse(text.replace(/'/g, '"'));
           }
-        ]
-      },
-      options: {
-        responsive: true,
-        plugins: { legend: { position: 'top' } },
-        scales: { y: { beginAtZero: true } }
+          allLogs.push(obj);
+          // keep list bounded (latest 200)
+          if (allLogs.length > 200) allLogs.shift();
+
+          // Apply currently selected filter
+          const curFilter = filter.value.toLowerCase();
+          const toRender = curFilter === "all" ? allLogs : allLogs.filter(l => l.label.toLowerCase() === curFilter);
+          renderLogs(toRender);
+          updateStatsAndCharts();
+        } catch (err) {
+          console.error("SSE parse error:", err, e.data);
+        }
+      };
+      sse.onerror = (err) => {
+        console.warn("SSE error", err);
+      };
+    }
+
+    startBtn.addEventListener('click', async () => {
+      try {
+        const res = await fetch("/start_stream", { method: "POST" });
+        const data = await res.json();
+        if (data.status === "started" || data.status === "already_running") {
+          openSSE();
+          startBtn.disabled = true;
+        }
+      } catch (err) {
+        console.error("start failed", err);
       }
     });
+
+    stopBtn.addEventListener('click', async () => {
+      try {
+        await fetch("/stop_stream", { method: "POST" });
+        if (sse) sse.close();
+        startBtn.disabled = false;
+      } catch (err) {
+        console.error("stop failed", err);
+      }
+    });
+
+    // CSV load + filter behavior
+    fileInput.addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const parsed = parseCSV(ev.target.result);
+        // We will merge file logs with live logs (file logs first)
+        allLogs = parsed.concat(allLogs);
+        const curFilter = filter.value.toLowerCase();
+        const toRender = curFilter === "all" ? allLogs : allLogs.filter(l => l.label.toLowerCase() === curFilter);
+        renderLogs(toRender);
+        updateStatsAndCharts();
+      };
+      reader.readAsText(file);
+    });
+
+    filter.addEventListener('change', () => {
+      const val = filter.value.toLowerCase();
+      const toRender = val === "all" ? allLogs : allLogs.filter(l => l.label.toLowerCase() === val);
+      renderLogs(toRender);
+    });
+
+    // initial charts
+    updateStatsAndCharts();
   </script>
 </body>
 </html>
