@@ -53,6 +53,9 @@ def generate_packets():
 @app.route("/")
 def index():
     return render_template("index.html")
+@app.route("/alert")
+def alert():
+    return render_template("alert.html")
 
 @app.route("/stream")
 def stream():

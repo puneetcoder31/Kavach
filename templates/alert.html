@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Firewall Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* --- General Styling --- */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #1a1a2e;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 2rem;
+        }
+
+        .dashboard {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1, h2 {
+            color: #ffffff;
+            border-bottom: 2px solid #4a4a70;
+            padding-bottom: 10px;
+        }
+
+        /* --- Button Styling --- */
+        .simulate-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-bottom: 2rem;
+        }
+
+        .simulate-btn:hover {
+            background-color: #0056b3;
+        }
+        
+        /* --- Alert Styling --- */
+        .status-box {
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 2rem;
+            font-weight: bold;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+
+        .status-normal {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .status-alert {
+            color: white;
+            border: 2px solid white;
+            animation: flash 1.5s linear infinite;
+        }
+        
+        /* Flashing animation for the alert */
+        @keyframes flash {
+            0% { background-color: #dc3545; }
+            50% { background-color: #a01c29; }
+            100% { background-color: #dc3545; }
+        }
+        
+        /* --- Metrics & Details Styling --- */
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-card {
+            background-color: #2a2a4e;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .metric-card .label {
+            font-size: 1rem;
+            color: #a0a0c0;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-card .value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        .metric-card .delta {
+            font-size: 1rem;
+            color: #ff4b4b;
+        }
+        
+        .actions {
+            background-color: #442121;
+            border-left: 5px solid #ff4b4b;
+            padding: 1.5rem;
+            border-radius: 5px;
+        }
+        
+        /* Hidden by default */
+        #attackDetails {
+            display: none;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="dashboard">
+        <h1>🛡 Adaptive AI Firewall - Live Security Dashboard</h1>
+
+        <div id="statusBox" class="status-box status-normal">
+            System Status: Normal. No threats detected.
+        </div>
+
+        <button id="simulateBtn" class="simulate-btn">Simulate Live Traffic Analysis</button>
+
+        <div id="attackDetails">
+            <div class="details-grid">
+                <div class="metric-card">
+                    <div class="label">Target IP Address</div>
+                    <div class="value">10.0.0.10</div>
+                </div>
+                <div class="metric-card">
+                    <div class="label">Unique Attacker IPs</div>
+                    <div class="value" id="attackerCount">1,248</div>
+                </div>
+                <div class="metric-card">
+                    <div class="label">Requests / Second</div>
+                    <div class="value" id="requestRate">4,820</div>
+                    <div class="delta">▲ 4500 (Critical)</div>
+                </div>
+            </div>
+
+            <h2>Traffic Volume Analysis (Last 60 Seconds)</h2>
+            <canvas id="trafficChart"></canvas>
+            
+            <h2>Recommended Immediate Actions</h2>
+            <div class="actions">
+                <ul>
+                    <li><strong>Initiate IP Blocking:</strong> The system has identified suspicious source IPs. Automatically block all suspicious IPs?</li>
+                    <li><strong>Isolate Target:</strong> Temporarily isolate the target server <strong>10.0.0.10</strong> from external traffic to mitigate impact.</li>
+                    <li><strong>Notify Security Team:</strong> An automated alert has been sent to the on-call security analyst.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const simulateBtn = document.getElementById('simulateBtn');
+        const statusBox = document.getElementById('statusBox');
+        const attackDetails = document.getElementById('attackDetails');
+        const trafficChartCanvas = document.getElementById('trafficChart');
+        let trafficChart;
+
+        simulateBtn.addEventListener('click', function() {
+            // Disable button to prevent multiple clicks
+            simulateBtn.disabled = true;
+            simulateBtn.textContent = "Analyzing...";
+
+            setTimeout(triggerAlert, 2000); // Wait 2 seconds to simulate analysis
+        });
+
+        function triggerAlert() {
+            // 1. Update the status box to a flashing alert
+            statusBox.className = 'status-box status-alert';
+            statusBox.innerHTML = '🚨 ALERT: DDoS ATTACK IN PROGRESS';
+
+            // 2. Show the attack details section
+            attackDetails.style.display = 'block';
+            
+            // 3. Generate data and draw the chart
+            createTrafficChart();
+            
+            // Re-enable button
+            simulateBtn.disabled = false;
+            simulateBtn.textContent = "Simulate Live Traffic Analysis";
+        }
+
+        function createTrafficChart() {
+            // Destroy the old chart if it exists, to prevent bugs
+            if (trafficChart) {
+                trafficChart.destroy();
+            }
+
+            // Generate plausible data for a traffic spike
+            const labels = Array.from({ length: 60 }, (_, i) => i); // 60 seconds
+            const attackData = [
+                ...Array.from({ length: 40 }, () => Math.floor(Math.random() * 150 + 50)), // Normal traffic for 40s
+                ...Array.from({ length: 20 }, () => Math.floor(Math.random() * 1000 + 4000)) // Spike for 20s
+            ];
+
+            const ctx = trafficChartCanvas.getContext('2d');
+            trafficChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Attack Traffic (Requests/sec)',
+                        data: attackData,
+                        borderColor: '#ff4b4b',
+                        backgroundColor: 'rgba(255, 75, 75, 0.2)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: '#e0e0e0' }
+                        },
+                        x: {
+                            ticks: { color: '#e0e0e0' }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: { color: '#e0e0e0' }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+
+</body>
+</html>
